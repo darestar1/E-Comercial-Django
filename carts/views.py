@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect,get_object_or_404
 from .models import Cart,CartItem
-from store.models import Product
+from store.models import Product,Variation
 from django.core.exceptions import ObjectDoesNotExist
 # Create your views here.
 def cart(request,total=0,quantity=0,cart_items=None):
@@ -33,14 +33,23 @@ def _cart_id(request):
     return cart
 
 def add_cart(request,product_id):
+    product=Product.objects.get(id=product_id)
+    product_variation =[]
     if request.method =="POST":
-        color=request.POST["color"]
-        size=request.POST["size"]
-        print(color,size)
-   
+        # color=request.POST["color"]
+        # size=request.POST["size"]
+        # print(color,size) i need to do this dynamic
+        for item in request.POST:
+            key= item
+            value= request.POST[key]
+            # print(key,value)
+            try:
+                variation = Variation.objects.get(product=product,variation_category__iexact=key,variation_value__iexact=value)
+                product_variation.append(variation)
+            except:
+                pass
         
 
-    product=Product.objects.get(id=product_id)
     try:
         cart= Cart.objects.get(cart_id=_cart_id(request))
     except Cart.DoesNotExist:
